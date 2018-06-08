@@ -1,0 +1,25 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>netstandard2.0</TargetFramework>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Content Include="..\..\..\..\..\Users\jvandick\.nuget\packages\botframework.qnamaker\0.0.2.8\contentFiles\any\netcoreapp2.0\secret.json" Link="secret.json">
+      <Private>False</Private>
+      <NuGetPackageVersion>0.0.2.8</NuGetPackageVersion>
+      <NuGetItemType>Content</NuGetItemType>
+      <NuGetPackageId>BotFramework.QnAMaker</NuGetPackageId>
+    </Content>
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.Bot.Builder.Ai.LUIS" Version="4.0.1-preview" />
+    <PackageReference Include="Microsoft.Bot.Builder.Ai.QnA" Version="4.0.1-preview" />
+    <PackageReference Include="Microsoft.Bot.Builder.CognitiveServices" Version="1.1.7" />
+    <PackageReference Include="Microsoft.Bot.Builder.Core" Version="4.0.1-preview" />
+    <PackageReference Include="Microsoft.Bot.Builder.Core.Extensions" Version="4.0.1-preview" />
+    <PackageReference Include="Microsoft.Bot.Builder.Dialogs" Version="4.0.1-preview" />
+  </ItemGroup>
+
+</Project>

@@ -1,0 +1,12 @@
+﻿{
+  "LUISSettings": {
+    "ModelId": "<Your model id>",
+    "SubscriptionKey": "<Your subsription key>",
+    "Url": "<Your url>"
+  },
+  "QnASettings": {
+    "EndpointKey": "<Your endpoint key>",
+    "KnowledgeBaseId": "<Your knowledge base id>",
+    "Url": "<Your Url>"
+  }
+}
