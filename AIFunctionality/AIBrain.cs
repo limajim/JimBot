@@ -9,24 +9,31 @@ namespace AIFunctionality
     /// </summary>
     public class AIBrain
     {
-
-        public static async Task<string> GetAnswersFromQnA(string question, IConfiguration configuration)
+        private IConfiguration _configuration;
+        private string _question;
+        public AIBrain(IConfiguration configuration, string question)
         {
-            return await QnAConnectivity.GetQnAAnswer(question, configuration);
-        }
-        public static async Task<string> GetUtteranceFromLUIS(string question, IConfiguration configuration)
-        {
-            return await LuisConnectivity.GetAllIntents(question, configuration);
+            _question = question;
+            _configuration = configuration;
         }
 
-        public static async Task<string> CheckLUISandQandAAndGetMostAccurateResult(string question, IConfiguration configuration)
+        public async Task<string> GetAnswersFromQnA()
         {
-            var topIntent = await LuisConnectivity.GetTopIntent(question, configuration);
-            var response = await GetResponseForUser(topIntent, question, configuration);
+            return await QnAConnectivity.GetQnAAnswer(_question, _configuration);
+        }
+        public async Task<string> GetAllIntentsFromLUIS()
+        {
+            return await LuisConnectivity.GetAllIntents(_question, _configuration);
+        }
+
+        public async Task<string> CheckLUISandQandAAndGetMostAccurateResult()
+        {
+            var topIntent = await LuisConnectivity.GetTopIntent(_question, _configuration);
+            var response = await GetResponseForUser(topIntent);
             return response;
         }
 
-        private static async Task<string> GetResponseForUser((string intent, double score)? topIntent, string question, IConfiguration configuration)
+        private async Task<string> GetResponseForUser((string intent, double score)? topIntent)
         {
             var returnValue = string.Empty;
             if (!topIntent.HasValue)
@@ -63,7 +70,7 @@ namespace AIFunctionality
                         break;
                     case "qnaquestion":
                         // QnA call here.
-                        returnValue = await GetAnswersFromQnA(question, configuration);
+                        returnValue = await GetAnswersFromQnA();
                         break;
                     default:
                         // The intent didn't match any case, so just display the recognition results.
