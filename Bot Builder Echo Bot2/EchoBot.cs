@@ -36,8 +36,9 @@ namespace Bot_Builder_Echo_Bot2
                 // Bump the turn count. 
                 state.TurnCount++;
 
-                var answer = await AIBrain.GetAnswersFromQnA(context.Activity.Text, _configuration);
-//                var answer = await AIBrain.GetUtteranceFromLUIS(context.Activity.Text, _configuration);
+                //                var answer = await AIBrain.GetAnswersFromQnA(context.Activity.Text, _configuration);
+                //                var answer = await AIBrain.GetUtteranceFromLUIS(context.Activity.Text, _configuration);
+                var answer = await AIBrain.CheckLUISandQandAAndGetMostAccurateResult(context.Activity.Text, _configuration);
                 
                 // Echo back to the user whatever they typed.
                 await context.SendActivity($"Turn {state.TurnCount}: '{answer}'");
