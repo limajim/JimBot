@@ -1,4 +1,8 @@
-﻿using Microsoft.Extensions.Configuration;
+﻿using Microsoft.Bot.Builder;
+using Microsoft.Bot.Builder.Core.Extensions;
+using Microsoft.Bot.Builder.Dialogs;
+using Microsoft.Extensions.Configuration;
+using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 
@@ -10,26 +14,38 @@ namespace AIFunctionality
     public class AIBrain
     {
         private IConfiguration _configuration;
-        private string _question;
-        public AIBrain(IConfiguration configuration, string question)
+        private ITurnContext _context;
+        private DialogSet AiDialogSet { get; set; }
+
+        public AIBrain(IConfiguration configuration, ITurnContext context)
         {
-            _question = question;
+            _context = context;
             _configuration = configuration;
         }
 
         public async Task<string> GetAnswersFromQnA()
         {
-            return await QnAConnectivity.GetQnAAnswer(_question, _configuration);
+            return await QnAConnectivity.GetQnAAnswer(_context.Activity.Text, _configuration);
         }
         public async Task<string> GetAllIntentsFromLUIS()
         {
-            return await LuisConnectivity.GetAllIntents(_question, _configuration);
+            return await LuisConnectivity.GetAllIntents(_context.Activity.Text, _configuration);
         }
 
         public async Task<string> CheckLUISandQandAAndGetMostAccurateResult()
         {
-            var topIntent = await LuisConnectivity.GetTopIntent(_question, _configuration);
-            var response = await GetResponseForUser(topIntent);
+            var response = string.Empty;
+            var state = _context.GetConversationState<Dictionary<string, object>>();
+            if (state.Count == 0)
+            {
+                var topIntent = await LuisConnectivity.GetTopIntent(_context.Activity.Text, _configuration);
+                response = await GetResponseForUser(topIntent);
+            }
+            else
+            {
+                await RunDialogContext();
+            }
+
             return response;
         }
 
@@ -72,6 +88,16 @@ namespace AIFunctionality
                         // QnA call here.
                         returnValue = await GetAnswersFromQnA();
                         break;
+                    case "profilechange":
+                        try
+                        {
+                            await RunDialogContext();
+                        }
+                        catch ( Exception exception )
+                        {
+                            returnValue = $"An Exception Occurred: {exception.Message}";
+                        }
+                        break;
                     default:
                         // The intent didn't match any case, so just display the recognition results.
                         returnValue = $"Dispatch intent: {topIntent.Value.intent} ({topIntent.Value.score}).";
@@ -79,6 +105,42 @@ namespace AIFunctionality
                 }
             }
             return returnValue;
+        }
+
+        private async Task RunDialogContext()
+        {
+            AiDialogSet = CreateDialogSet();
+            var state = _context.GetConversationState<Dictionary<string, object>>();
+            var dc = AiDialogSet.CreateContext(_context, state);
+            await dc.Continue();
+
+            if (!_context.Responded)
+            {
+                await dc.Begin("firstRun");
+            }
+        }
+
+        private DialogSet CreateDialogSet()
+        {
+            var dialogs = new DialogSet();
+
+            dialogs.Add("getProfile", new ProfileControl());
+            dialogs.Add("firstRun",
+                new WaterfallStep[]
+                {
+                    async (dc, args, next) =>
+                    {
+                         await dc.Context.SendActivity("Welcome! We need to ask a few questions to get started.");
+                         await dc.Begin("getProfile");
+                    },
+                    async (dc, args, next) =>
+                    {
+                        await dc.Context.SendActivity($"Thanks {args["name"]} I have your phone number as {args["phone"]}!");
+                        await dc.End();
+                    }
+                }
+            );
+            return dialogs;
         }
     }
 }

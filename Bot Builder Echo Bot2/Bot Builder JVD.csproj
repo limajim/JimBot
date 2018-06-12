@@ -5,6 +5,10 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Remove="EchoState.cs" />
+  </ItemGroup>
+
+  <ItemGroup>
     <None Remove="appsettings.json.sample" />
   </ItemGroup>
 
